@@ -51,8 +51,8 @@ class Venue(db.Model):
     image_link = db.Column(db.String(500))
     past_shows = db.Column(db.ARRAY(db.String(500)))
     upcoming_shows = db.Column(db.ARRAY(db.String(500)))
-    past_shows_count = db.Column(db.Integer)
-    upcoming_shows_count = db.Column(db.Integer)
+
+    # TODO: implement any missing fields, as a database migration using Flask-Migrate //DONE
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -72,7 +72,6 @@ class Artist(db.Model):
     past_shows_count = db.Column(db.Integer)
     upcoming_shows_count = db.Column(db.Integer)
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
@@ -239,37 +238,55 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
     print('create_venue_submission() called')
-    body = {}
-    error = False
+    form_data = request.form.to_dict()
+    print(form_data)
+    value_from_form = form_data['seeking_talent']  # This could be request.form['your_boolean_field']
+    genre_data = request.form.getlist('genres')
+    print(genre_data)
+    # Convert to Python Boolean
+    boolean_value = True if value_from_form.lower() == 'true' else False
+
+    new_venue = Venue(
+        name=form_data['name'],
+        genres=genre_data,
+        address=form_data['address'],
+        city=form_data['city'],
+        state=form_data['state'],
+        phone=form_data['phone'],
+        website=form_data['website_link'],
+        facebook_link=form_data['facebook_link'],
+        seeking_talent=boolean_value,
+        seeking_description=form_data['seeking_description'],
+        image_link=form_data['image_link'],
+    )
+    print(new_venue)
     try:
-        newVenue_data = request.get_json()
-        venue = Venue(
-            name=newVenue_data['name'],
-            genres=newVenue_data['genres'],
-            address=newVenue_data['address'],
-            city=newVenue_data['city'],
-            state=newVenue_data['state'],
-            phone=newVenue_data['phone'],
-            website=newVenue_data['website_link'],
-            facebook_link=newVenue_data['facebook_link'],
-            seeking_talent=newVenue_data['seeking_talent'],
-            seeking_description=newVenue_data['seeking_description'],
-            image_link=newVenue_data['image_link'],
-        )
-        db.session.add(venue)
-        db.session.commit()
-        body['name'] = venue.name
+      print('try')
+      db.session.add(new_venue)
+      db.session.commit()
+      flash('Venue ' + request.form['name'] + ' was successfully listed!')
     except:
-        error = True
-        db.session.rollback()
-        print(sys.exc_info())
+      print('except')
+      print(sys.exc_info())
+      db.session.rollback()
+      flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
 
     finally:
-        db.session.close()
-    if error:
-        abort(400)
-    else:
-        flash('Venue ' + request.form['name'] + ' was successfully listed!')
+      print('finally')
+      db.session.close()
+      return render_template('pages/home.html')
+
+    # except:
+    #     error = True
+    #     db.session.rollback()
+    #     print(sys.exc_info())
+
+    # finally:
+    #     db.session.close()
+    # if error:
+    #     abort(400)
+    # else:
+    #     flash('Venue ' + request.form['name'] + ' was successfully listed!')
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
 
