@@ -82,7 +82,6 @@ def venues():
           }
       # Append venue information to the correct city and state
       
-
       data_dict[city_state_key]["venues"].append({
           "id": venue.id,
           "name": venue.name,
@@ -112,8 +111,6 @@ def show_venue(venue_id):
   print(venue_id)
   # shows the venue page with the given venue_id
   data = Venue.query.get(venue_id)
-  print(data.genres)
-  # add upcoming and past shows count
   shows = Show.query.filter_by(venue_id=venue_id).all()
   past_shows = []
   upcoming_shows = []
@@ -179,15 +176,6 @@ def create_venue_submission():
       return render_template('pages/home.html')
 
 
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
-
-  # on successful db insert, flash success
-  
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-  # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  #return render_template('pages/home.html')
 
 @app.route('/venues/<venue_id>/delete', methods=['GET'])
 def delete_venue(venue_id):
